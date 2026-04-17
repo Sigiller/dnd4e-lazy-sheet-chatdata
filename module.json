@@ -2,7 +2,7 @@
 	"id": "dnd4e-lazy-sheet-chatdata",
 	"title": "dnd4e — ленивый chatData на листе (тест)",
 	"description": "Патчи производительности листа dnd4e: см. main.js и lib/*.js (каждый файл — кандидат в отдельный PR). Требует lib-wrapper.",
-	"version": "0.4.0",
+	"version": "0.5.0",
 	"authors": [{ "name": "Local" }],
 	"esmodules": ["main.js"],
 	"compatibility": {
