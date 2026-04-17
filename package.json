@@ -1,0 +1,6 @@
+{
+	"name": "dnd4e-lazy-sheet-chatdata",
+	"version": "0.4.0",
+	"private": true,
+	"description": "Дублирует минорную версию из module.json для отчётов/диффов; Foundry грузит только module.json."
+}
