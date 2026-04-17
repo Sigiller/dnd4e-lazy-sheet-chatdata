@@ -2,6 +2,8 @@
 
 Модуль Foundry VTT 13 для dnd4e: ускорение первого открытия листа за счёт отложенного `getChatData` / части `enrichHTML` на свёрнутых строках и связанных патчей (`lib/*`). Требуется **lib-wrapper**.
 
+Репозиторий (приватный): https://github.com/Sigiller/dnd4e-lazy-sheet-chatdata
+
 ## Разработка
 
 - Каталог модуля в данных Foundry: `Data/modules/dnd4e-lazy-sheet-chatdata` (или симлинк из этого репозитория).
