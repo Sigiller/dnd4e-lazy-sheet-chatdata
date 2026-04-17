@@ -1,39 +1,39 @@
-# Цикл доработки производительности (лист dnd4e)
+# Performance iteration loop (dnd4e sheet)
 
-Правило: **один логический шаг за раз** — измерение → вывод → только потом следующий шаг.
+Rule: **one logical step at a time** — measure → conclusion → only then the next step.
 
-## 1. До изменений (baseline)
+## 1. Before changes (baseline)
 
-- Зафиксировать **один** намеренный шаг (одна гипотеза / одна правка в коде).
-- Прогон теста в `tools/foundry-sheet-e2e` в **том же мире** и с тем же `.env`, что и для сравнения (желательно `COLD_OPEN_RUNS=5`, `COLD_OPEN_ONLY=1`).
-- Сохранить JSON (`sheet-perf-collect-*.json`) и скопировать в журнал ключевые поля: `coldOpen.summary`, `worldBaseline`, `lazyModuleReport`, при включённой настройке **«[Профиль] Лог суммы getChatDataSheetListFast за prep»** — ещё `lazySheetListFastMetrics` / `lazySheetListFastSettingOn` в каждом cold-прогоне.
+- Lock in **one** intentional step (one hypothesis / one code change).
+- Run `tools/foundry-sheet-e2e` in the **same world** with the same `.env` as the comparison (prefer `COLD_OPEN_RUNS=5`, `COLD_OPEN_ONLY=1`).
+- Save the JSON (`sheet-perf-collect-*.json`) and copy key fields into the log: `coldOpen.summary`, `worldBaseline`, `lazyModuleReport`.
 
-## 2. Реализация
+## 2. Implementation
 
-- Внести **только** изменения, относящиеся к текущему шагу (без «заодно» рефакторинга).
-- Перед прогоном collect после правок **модуля**: поднять **минор** в **`module.json`** и в корневом **`package.json`** (одинаковые версии), чтобы в отчёте различались `lazyModuleReport.disk` и клиент после F5.
-- Коммит с понятным сообщением (что меняли и зачем).
+- Change **only** what belongs to the current step (no drive-by refactors).
+- After **module** edits, bump **minor** in **`module.json`** and root **`package.json`** (same semver) before the next collect run so `lazyModuleReport.disk` and the client after F5 differ.
+- Commit with a clear message (what changed and why).
 
-## 3. После изменений
+## 3. After changes
 
-- Повторить **тот же** прогон collect, что и в п.1.
-- Сохранить второй JSON.
+- Repeat the **same** collect run as in step 1.
+- Save the second JSON.
 
-## 4. Сравнение и фиксация
+## 4. Compare and record
 
-- Сравнить: прежде всего **median / max `sheetOpenMs`**, при необходимости **`reloadToGameReadyMs`**, **`longTasksDuringOpen`**, при спорных случаях — `RUN_BREAKDOWN=1` на том же актёре.
-- Записать строку в [`PERF-RESULTS.md`](PERF-RESULTS.md): дата, шаг, коммиты до/после, цифры до/после, краткий вывод (лучше / хуже / в пределах шума).
+- Compare: primarily **median / max `sheetOpenMs`**, and if needed **`reloadToGameReadyMs`**, **`longTasksDuringOpen`**, or `RUN_BREAKDOWN=1` on the same actor when ambiguous.
+- Add a row to [`PERF-RESULTS.md`](PERF-RESULTS.md): date, step, commits before/after, numbers before/after, short verdict (better / worse / within noise).
 
-## 5. Если результат хуже ожидаемого
+## 5. If the result is worse than expected
 
-**Не переходить к следующему шагу**, пока не сделано одно из:
+**Do not move to the next step** until you either:
 
-- откат коммита (или revert), **или**
-- разбор причины (регрессия UX, лишние вызовы, порядок libWrapper, конкурирующие long task и т.д.) и **исправление текущего шага** с повтором п.3–4.
+- roll back the commit (or revert), **or**
+- diagnose (UX regression, extra calls, libWrapper order, competing long tasks, etc.) and **fix the current step**, then repeat steps 3–4.
 
-Только после принятого результата (улучшение или осознанный «нейтрально + объяснено») — следующий пункт плана.
+Only after an accepted outcome (improvement or a deliberate “neutral + explained”) — next plan item.
 
-## Ссылки
+## References
 
-- Скрипт серии baseline: `tools/foundry-sheet-e2e/collect-plan-baseline.mjs`
-- Поле отчёта с версией модуля и git: `lazyModuleReport` в JSON collect
+- Baseline series script: `tools/foundry-sheet-e2e/collect-plan-baseline.mjs`
+- Module version + git in collect JSON: `lazyModuleReport`

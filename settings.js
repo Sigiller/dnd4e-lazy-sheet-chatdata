@@ -1,13 +1,12 @@
 import { MODULE_ID } from "./constants.js";
 
 /**
- * Все флаги — scope world, чтобы GM включал эксперименты для стола.
- * Каждый файл-патч проверяет `enabled` и свой ключ.
+ * World-scoped flags (GM toggles). Each patch file checks `enabled` and its own key.
  */
 export function registerModuleSettings() {
 	game.settings.register(MODULE_ID, "enabled", {
-		name: "Модуль включён",
-		hint: "Мастер-переключатель всех оптимизаций.",
+		name: "Module enabled",
+		hint: "Master switch for all optimizations in this package.",
 		scope: "world",
 		config: true,
 		type: Boolean,
@@ -15,8 +14,8 @@ export function registerModuleSettings() {
 	});
 
 	game.settings.register(MODULE_ID, "enrichOnExpand", {
-		name: "Полный enrich при раскрытии строки предмета",
-		hint: "После itemSummary — полный getChatData и обновление DOM (см. lib/item-summary-expand-enrich.js).",
+		name: "Full enrich when expanding an item row",
+		hint: "After itemSummary — full getChatData and DOM update (see lib/item-summary-expand-enrich.js).",
 		scope: "world",
 		config: true,
 		type: Boolean,
@@ -24,8 +23,8 @@ export function registerModuleSettings() {
 	});
 
 	game.settings.register(MODULE_ID, "deferCollapsedRowChatData", {
-		name: "Свёрнутые строки: без getChatData до раскрытия",
-		hint: "На листе в prep — пустой stub вместо getChatData для свёрнутых строк; data-summary-deferred через хук render; догрузка по клику (модуль, без правок системы dnd4e).",
+		name: "Collapsed rows: skip getChatData until expanded",
+		hint: "During sheet prep — stub instead of getChatData for collapsed rows; data-summary-deferred via render hook; full load on click (module-only, no dnd4e core edits).",
 		scope: "world",
 		config: true,
 		type: Boolean,
@@ -33,8 +32,8 @@ export function registerModuleSettings() {
 	});
 
 	game.settings.register(MODULE_ID, "lazyBiographyPrep", {
-		name: "Биография: без enrich при сборке листа",
-		hint: "Во время _prepareContext — только commonReplace (или сырой HTML). См. lib/prep-skip-enrich-html.js + lib/post-idle-biography-enrich.js.",
+		name: "Biography: skip enrich during sheet prep",
+		hint: "During _prepareContext — commonReplace (or raw HTML) only. Full enrich runs when the Biography tab is first shown (lib/actor-sheet-change-tab-hooks.js).",
 		scope: "world",
 		config: true,
 		type: Boolean,
@@ -42,38 +41,29 @@ export function registerModuleSettings() {
 	});
 
 	game.settings.register(MODULE_ID, "lazyPowerCardPrepEnrich", {
-		name: "Карточка силы (autoGen): без enrich при сборке",
-		hint: "Во время _prepareContext не вызывать enrichHTML для detailsText; сырой HTML карточки до раскрытия/перерисовки. См. lib/prep-skip-enrich-html.js.",
+		name: "Power card (autoGen): skip enrich during prep",
+		hint: "During _prepareContext do not call enrichHTML for detailsText; raw card HTML until expand/re-render. See lib/prep-skip-enrich-html.js.",
 		scope: "world",
 		config: true,
 		type: Boolean,
 		default: true
 	});
 
-	game.settings.register(MODULE_ID, "idleBiographyAfterRender", {
-		name: "Биография: догрузить enrich после первого кадра (эксп.)",
-		hint: "Если включено — requestIdleCallback + хук renderActorSheetV2; ProseMirror может потребовать доработки под dnd4e. См. lib/post-idle-biography-enrich.js.",
+	game.settings.register(MODULE_ID, "deferOffTabItemChatPrep", {
+		name: "[Cold open] Defer non-power getChatData until leaving Powers tab",
+		hint: "When the default sheet tab is Powers: first _prepareContext uses a light chatData stub for non-power items (and items not expanded on the sheet); full prep after switching to any other sheet tab. Patched in systems/dnd4e/.../actor-sheet.js plus lib/actor-sheet-change-tab-hooks.js.",
 		scope: "world",
 		config: true,
 		type: Boolean,
-		default: false
+		default: true
 	});
 
 	game.settings.register(MODULE_ID, "enrichHtmlSessionCache", {
-		name: "Кэш enrichHTML (сессия)",
-		hint: "Короткий LRU по хэшу входной строки + актёр + secrets. См. lib/enrich-html-session-cache.js.",
+		name: "enrichHTML session cache",
+		hint: "Short LRU keyed by input hash + actor + secrets. See lib/enrich-html-session-cache.js.",
 		scope: "world",
 		config: true,
 		type: Boolean,
 		default: true
-	});
-
-	game.settings.register(MODULE_ID, "logSheetListFastAggregates", {
-		name: "[Профиль] Лог суммы getChatDataSheetListFast за prep",
-		hint: "После каждого _prepareContext листа — в консоль total/calls/avg ms по быстрому пути списка. Для плана cold open / фаза profile-fast-path.",
-		scope: "world",
-		config: true,
-		type: Boolean,
-		default: false
 	});
 }
