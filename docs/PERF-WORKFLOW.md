@@ -6,7 +6,7 @@
 
 - Зафиксировать **один** намеренный шаг (одна гипотеза / одна правка в коде).
 - Прогон теста в `tools/foundry-sheet-e2e` в **том же мире** и с тем же `.env`, что и для сравнения (желательно `COLD_OPEN_RUNS=5`, `COLD_OPEN_ONLY=1`).
-- Сохранить JSON (`sheet-perf-collect-*.json`) и скопировать в журнал ключевые поля: `coldOpen.summary`, `worldBaseline`, `lazyModuleReport`.
+- Сохранить JSON (`sheet-perf-collect-*.json`) и скопировать в журнал ключевые поля: `coldOpen.summary`, `worldBaseline`, `lazyModuleReport`, при включённой настройке **«[Профиль] Лог суммы getChatDataSheetListFast за prep»** — ещё `lazySheetListFastMetrics` / `lazySheetListFastSettingOn` в каждом cold-прогоне.
 
 ## 2. Реализация
 
