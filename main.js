@@ -5,6 +5,7 @@
 
 import { MODULE_ID } from "./constants.js";
 import { registerModuleSettings } from "./settings.js";
+import { registerActorSheet4eClass } from "./lib/sheet-prep-context.js";
 import { registerPrepContextMarker } from "./lib/prep-context-marker.js";
 import { registerItemGetChatDataLazy } from "./lib/item-getchatdata-lazy.js";
 import { registerPrepSkipEnrichHtml } from "./lib/prep-skip-enrich-html.js";
@@ -20,7 +21,6 @@ import {
 
 Hooks.once("init", () => {
 	registerModuleSettings();
-	registerRenderCollapsedRowsDeferredFlag();
 	registerSheetPerfProbeInit();
 });
 
@@ -43,12 +43,15 @@ Hooks.once("libWrapper.Ready", async () => {
 		return;
 	}
 
-	// Single libWrapper on enrichHTML (prep-skip + LRU inside); then other targets.
-	registerPrepSkipEnrichHtml();
-	registerItemGetChatDataLazy();
+	registerActorSheet4eClass(ActorSheet4e);
+
+	// preparingSheet registry before getChatData wraps run during _prepareContext
 	registerPrepContextMarker(ActorSheet4e);
+	registerPrepSkipEnrichHtml();
+	registerItemGetChatDataLazy(ActorSheet4e);
 	registerItemSummaryExpandEnrich(ActorSheet4e);
 	registerActorSheetChangeTabHooks(ActorSheet4e);
+	registerRenderCollapsedRowsDeferredFlag(ActorSheet4e);
 	try {
 		registerSheetPerfLibWrapperProbes();
 	} catch (e) {
@@ -57,6 +60,6 @@ Hooks.once("libWrapper.Ready", async () => {
 	logParallelUpstreamSnippetOnce();
 
 	console.log(
-		`[${MODULE_ID}] Patches: prep-context-marker (+ post-stub); item-getchatdata-lazy, prep-skip-enrich-html, actor-sheet-change-tab-hooks (cold: off-tab item stub + bio tab enrich), item-summary-expand-enrich, render-collapsed-rows-deferred-flag; sheet-perf-probe (lib/sheet-perf-probe.js); actor-sheet.js — deferOffTabItemChatPrep; upstream snippet/PR — parallel-prep-upstream-snippet.js`
+		`[${MODULE_ID}] Patches: sheet-prep-context; prep-context-marker; item-getchatdata-lazy (prep stub/fast only); prep-skip-enrich-html; off-tab item stub; actor-sheet-change-tab-hooks; item-summary-expand-enrich; render-collapsed-rows-deferred-flag; sheet-perf-probe`
 	);
 });

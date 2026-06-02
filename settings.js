@@ -51,7 +51,16 @@ export function registerModuleSettings() {
 
 	game.settings.register(MODULE_ID, "deferOffTabItemChatPrep", {
 		name: "[Cold open] Defer non-power getChatData until leaving Powers tab",
-		hint: "When the default sheet tab is Powers: first _prepareContext uses a light chatData stub for non-power items (and items not expanded on the sheet); full prep after switching to any other sheet tab. Patched in systems/dnd4e/.../actor-sheet.js plus lib/actor-sheet-change-tab-hooks.js.",
+		hint: "When the default sheet tab is Powers: first _prepareContext stubs chatData for non-power items (except expanded rows); full sheet re-render after switching to any other tab (lib/actor-sheet-change-tab-hooks.js). Module-only.",
+		scope: "world",
+		config: true,
+		type: Boolean,
+		default: true
+	});
+
+	game.settings.register(MODULE_ID, "deferCompendiumEnrichDuringPrep", {
+		name: "Compendium links: stub getChatData during sheet prep",
+		hint: "During _prepareContext, items whose description contains @Compendium/@UUID/@Item/@Actor links get an empty stub until the row is expanded (full enrich on expand if «Full enrich when expanding» is on).",
 		scope: "world",
 		config: true,
 		type: Boolean,
