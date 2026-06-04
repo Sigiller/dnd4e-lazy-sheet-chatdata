@@ -78,9 +78,15 @@ ok(
 	/getItemGetChatDataTargets/.test(fs.readFileSync(path.join(moduleRoot, "lib/item-getchatdata-lazy.js"), "utf8"))
 );
 ok(
-	"prep-context-marker registers on setup (after sheetClasses exist)",
-	/Hooks\.once\("setup"/.test(fs.readFileSync(path.join(moduleRoot, "main.js"), "utf8")) &&
-		/getSheetClassesForSubType/.test(fs.readFileSync(path.join(moduleRoot, "lib/libwrapper-register.js"), "utf8"))
+	"prep-context-marker registers on ready + fox sheet lineage + direct fallback",
+	/registerPrepContextMarker\(ActorSheet4eClass\)/.test(fs.readFileSync(path.join(moduleRoot, "main.js"), "utf8")) &&
+		/isDnd4eActorSheetClass/.test(fs.readFileSync(path.join(moduleRoot, "lib/libwrapper-register.js"), "utf8")) &&
+		/registerPrepContextMarkerDirect/.test(fs.readFileSync(path.join(moduleRoot, "lib/prep-context-marker.js"), "utf8"))
+);
+ok(
+	"enrichHTML + getChatData use libWrapper.MIXED (may skip wrapped)",
+	/libWrapper\.MIXED/.test(fs.readFileSync(path.join(moduleRoot, "lib/prep-skip-enrich-html.js"), "utf8")) &&
+		/libWrapper\.MIXED/.test(fs.readFileSync(path.join(moduleRoot, "lib/item-getchatdata-lazy.js"), "utf8"))
 );
 
 const allPass = checks.every((c) => c.pass);

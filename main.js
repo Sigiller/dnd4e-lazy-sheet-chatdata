@@ -28,7 +28,9 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-	if (game.system?.id === "dnd4e") registerSheetPerfProbeReady();
+	if (game.system?.id !== "dnd4e" || !ActorSheet4eClass) return;
+	registerPrepContextMarker(ActorSheet4eClass);
+	registerSheetPerfProbeReady();
 });
 
 Hooks.once("libWrapper.Ready", async () => {
@@ -46,7 +48,7 @@ Hooks.once("libWrapper.Ready", async () => {
 	}
 
 	registerActorSheet4eClass(ActorSheet4eClass);
-	// _prepareContext: register on setup — CONFIG.Actor.sheetClasses is filled in system init (after libWrapper.Ready).
+	// _prepareContext: register on ready (fox-4e-styling and other sheet modules register on init first).
 	registerPrepSkipEnrichHtml();
 	registerItemGetChatDataLazy(ActorSheet4eClass);
 	registerItemSummaryExpandEnrich(ActorSheet4eClass);
@@ -64,8 +66,3 @@ Hooks.once("libWrapper.Ready", async () => {
 	);
 });
 
-Hooks.once("setup", () => {
-	if (game.system?.id !== "dnd4e" || !ActorSheet4eClass) return;
-	registerPrepContextMarker(ActorSheet4eClass);
-	console.log(`[${MODULE_ID}] Patches (setup): prep-context-marker`);
-});

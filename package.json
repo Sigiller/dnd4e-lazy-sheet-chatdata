@@ -1,6 +1,6 @@
 {
 	"name": "dnd4e-lazy-sheet-chatdata",
-	"version": "0.11.3",
+	"version": "0.11.6",
 	"private": true,
 	"description": "Mirrors the semver from module.json for tooling/diffs; Foundry loads module.json only."
 }

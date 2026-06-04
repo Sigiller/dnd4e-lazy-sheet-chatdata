@@ -2,7 +2,7 @@
 	"id": "dnd4e-lazy-sheet-chatdata",
 	"title": "dnd4e Lazy Sheet ChatData",
 	"description": "DnD 4th Edition (dnd4e system) only — does not run on other systems. Performance patches for the dnd4e actor sheet (Foundry v13), tested against dnd4e 0.7.11: deferred getChatData / partial enrichHTML during sheet prep, plus an embedded sheet performance probe (lib/sheet-perf-probe.js). Requires lib-wrapper. Disable the standalone sheet-perf-probe module if it is still enabled in the world to avoid double libWrapper hooks on _renderHTML.",
-	"version": "0.11.3",
+	"version": "0.11.6",
 	"authors": [{ "name": "Sigiller", "url": "https://github.com/Sigiller" }],
 	"esmodules": ["main.js"],
 	"compatibility": {
