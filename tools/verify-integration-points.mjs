@@ -47,6 +47,7 @@ ok(
 );
 
 const moduleFiles = [
+	"lib/libwrapper-register.js",
 	"lib/item-getchatdata-lazy.js",
 	"lib/prep-context-marker.js",
 	"lib/prep-skip-enrich-html.js",
@@ -60,6 +61,27 @@ ok("module entry files exist", moduleFiles.every((f) => fs.existsSync(f)));
 const sheetPrepCtx = fs.readFileSync(path.join(moduleRoot, "lib/sheet-prep-context.js"), "utf8");
 ok("sheet-prep-context exports", /export function getPreparingSheet/.test(sheetPrepCtx));
 ok("off-tab-item-prep", fs.existsSync(path.join(moduleRoot, "lib/off-tab-item-prep.js")));
+
+const libFiles = [
+	"lib/prep-skip-enrich-html.js",
+	"lib/prep-context-marker.js",
+	"lib/item-getchatdata-lazy.js",
+	"lib/actor-sheet-change-tab-hooks.js"
+].map((f) => fs.readFileSync(path.join(moduleRoot, f), "utf8"));
+ok(
+	"libWrapper uses string targets via registerLibWrapperFirst (FVTT 13)",
+	libFiles.every((src) => /registerLibWrapperFirst/.test(src)) &&
+		libFiles.every((src) => !/libWrapper\.register\s*\(\s*MODULE_ID\s*,\s*[A-Za-z_]/.test(src))
+);
+ok(
+	"CONFIG.Item.documentClass getChatData target",
+	/getItemGetChatDataTargets/.test(fs.readFileSync(path.join(moduleRoot, "lib/item-getchatdata-lazy.js"), "utf8"))
+);
+ok(
+	"prep-context-marker registers on setup (after sheetClasses exist)",
+	/Hooks\.once\("setup"/.test(fs.readFileSync(path.join(moduleRoot, "main.js"), "utf8")) &&
+		/getSheetClassesForSubType/.test(fs.readFileSync(path.join(moduleRoot, "lib/libwrapper-register.js"), "utf8"))
+);
 
 const allPass = checks.every((c) => c.pass);
 console.log(JSON.stringify({ systemVersion: systemJson.version, allPass, checks }, null, 2));

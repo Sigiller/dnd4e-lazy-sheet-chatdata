@@ -19,6 +19,9 @@ import {
 	registerSheetPerfProbeReady
 } from "./lib/sheet-perf-probe.js";
 
+/** @type {typeof import("/systems/dnd4e/module/actor/actor-sheet.js").default | null} */
+let ActorSheet4eClass = null;
+
 Hooks.once("init", () => {
 	registerModuleSettings();
 	registerSheetPerfProbeInit();
@@ -34,24 +37,21 @@ Hooks.once("libWrapper.Ready", async () => {
 		return;
 	}
 
-	let ActorSheet4e;
 	try {
 		const mod = await import("/systems/dnd4e/module/actor/actor-sheet.js");
-		ActorSheet4e = mod.default;
+		ActorSheet4eClass = mod.default;
 	} catch (e) {
 		console.error(`[${MODULE_ID}] import actor-sheet`, e);
 		return;
 	}
 
-	registerActorSheet4eClass(ActorSheet4e);
-
-	// preparingSheet registry before getChatData wraps run during _prepareContext
-	registerPrepContextMarker(ActorSheet4e);
+	registerActorSheet4eClass(ActorSheet4eClass);
+	// _prepareContext: register on setup — CONFIG.Actor.sheetClasses is filled in system init (after libWrapper.Ready).
 	registerPrepSkipEnrichHtml();
-	registerItemGetChatDataLazy(ActorSheet4e);
-	registerItemSummaryExpandEnrich(ActorSheet4e);
-	registerActorSheetChangeTabHooks(ActorSheet4e);
-	registerRenderCollapsedRowsDeferredFlag(ActorSheet4e);
+	registerItemGetChatDataLazy(ActorSheet4eClass);
+	registerItemSummaryExpandEnrich(ActorSheet4eClass);
+	registerActorSheetChangeTabHooks(ActorSheet4eClass);
+	registerRenderCollapsedRowsDeferredFlag(ActorSheet4eClass);
 	try {
 		registerSheetPerfLibWrapperProbes();
 	} catch (e) {
@@ -60,6 +60,12 @@ Hooks.once("libWrapper.Ready", async () => {
 	logParallelUpstreamSnippetOnce();
 
 	console.log(
-		`[${MODULE_ID}] Patches: sheet-prep-context; prep-context-marker; item-getchatdata-lazy (prep stub/fast only); prep-skip-enrich-html; off-tab item stub; actor-sheet-change-tab-hooks; item-summary-expand-enrich; render-collapsed-rows-deferred-flag; sheet-perf-probe`
+		`[${MODULE_ID}] Patches (libWrapper.Ready): item-getchatdata-lazy; prep-skip-enrich-html; off-tab stub; actor-sheet-change-tab-hooks; item-summary-expand-enrich; render-collapsed-rows-deferred-flag; sheet-perf-probe`
 	);
+});
+
+Hooks.once("setup", () => {
+	if (game.system?.id !== "dnd4e" || !ActorSheet4eClass) return;
+	registerPrepContextMarker(ActorSheet4eClass);
+	console.log(`[${MODULE_ID}] Patches (setup): prep-context-marker`);
 });
