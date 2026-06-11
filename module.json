@@ -6,8 +6,9 @@
 	"authors": [{ "name": "Sigiller", "url": "https://github.com/Sigiller" }],
 	"esmodules": ["main.js"],
 	"compatibility": {
-		"minimum": "13",
-		"maximum": "13"
+		"minimum": "13.351",
+		"verified": "13.351",
+		"maximum": "13.351"
 	},
 	"relationships": {
 		"systems": [
