@@ -1,5 +1,4 @@
-# Foundry-style release: push tag vX.Y.Z → GitHub Release with module.zip (folder = module id) + module.json
-# (manifest/download URLs point at this tag’s release assets).
+# Foundry-style release: push tag vX.Y.Z → GitHub Release with module.zip (folder = module id)
 
 name: Release
 
@@ -17,20 +16,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
       - name: Verify tag matches module.json version
         run: |
           set -euo pipefail
           TAG="${GITHUB_REF_NAME}"
-          case "$TAG" in v*.*.*) ;; *)
-            echo "::error::Tag must look like v1.2.3, got: $TAG"
-            exit 1
-          ;; esac
           TAG_VER="${TAG#v}"
           MVER=$(jq -r .version module.json)
           if [ "$TAG_VER" != "$MVER" ]; then
-            echo "::error::Tag $TAG implies version $TAG_VER but module.json has $MVER — bump module.json (and package.json) before tagging."
+            echo "::error::Tag $TAG implies version $TAG_VER but module.json has $MVER"
             exit 1
           fi
+
+      - name: Clone dnd4e system for verify scripts
+        run: |
+          set -euo pipefail
+          mkdir -p ../../systems
+          git clone --depth 1 --branch 0.7.14 https://github.com/EndlesNights/dnd4eBeta.git ../../systems/dnd4e
+
+      - name: Verify module
+        run: npm ci && npm run check
 
       - name: Stage module folder and inject manifest URLs
         env:
@@ -40,14 +49,21 @@ jobs:
           set -euo pipefail
           MODULE_ID=$(jq -r .id module.json)
           BASE="https://github.com/${REPO}/releases/download/${TAG}"
+          LATEST_MANIFEST="https://github.com/${REPO}/releases/latest/download/module.json"
           mkdir -p "staging/${MODULE_ID}"
           rsync -a \
             --exclude='.git' \
             --exclude='.github' \
+            --exclude='.husky' \
             --exclude='staging' \
-            --exclude='dist' \
+            --exclude='node_modules' \
+            --exclude='docs' \
+            --exclude='tools' \
+            --exclude='scripts' \
+            --exclude='package.json' \
+            --exclude='package-lock.json' \
             ./ "staging/${MODULE_ID}/"
-          jq --arg manifest "${BASE}/module.json" --arg download "${BASE}/module.zip" \
+          jq --arg manifest "${LATEST_MANIFEST}" --arg download "${BASE}/module.zip" \
             '. + {manifest: $manifest, download: $download}' module.json \
             > "staging/${MODULE_ID}/module.json"
           mkdir -p dist

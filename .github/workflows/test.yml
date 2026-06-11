@@ -1,0 +1,27 @@
+name: Test
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Clone dnd4e system for verify scripts
+        run: |
+          set -euo pipefail
+          mkdir -p ../../systems
+          git clone --depth 1 --branch 0.7.14 https://github.com/EndlesNights/dnd4eBeta.git ../../systems/dnd4e
+
+      - run: npm ci
+      - run: npm run check

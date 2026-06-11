@@ -18,6 +18,7 @@ import {
 	registerSheetPerfProbeInit,
 	registerSheetPerfProbeReady
 } from "./lib/sheet-perf-probe.js";
+import { registerItemChatPrepHooks } from "./lib/item-chat-prep-hooks.js";
 
 /** @type {typeof import("/systems/dnd4e/module/actor/actor-sheet.js").default | null} */
 let ActorSheet4eClass = null;
@@ -51,6 +52,7 @@ Hooks.once("libWrapper.Ready", async () => {
 	// _prepareContext: register on ready (fox-4e-styling and other sheet modules register on init first).
 	registerPrepSkipEnrichHtml();
 	registerItemGetChatDataLazy(ActorSheet4eClass);
+	registerItemChatPrepHooks();
 	registerItemSummaryExpandEnrich(ActorSheet4eClass);
 	registerActorSheetChangeTabHooks(ActorSheet4eClass);
 	registerRenderCollapsedRowsDeferredFlag(ActorSheet4eClass);
@@ -62,7 +64,7 @@ Hooks.once("libWrapper.Ready", async () => {
 	logParallelUpstreamSnippetOnce();
 
 	console.log(
-		`[${MODULE_ID}] Patches (libWrapper.Ready): item-getchatdata-lazy; prep-skip-enrich-html; off-tab stub; actor-sheet-change-tab-hooks; item-summary-expand-enrich; render-collapsed-rows-deferred-flag; sheet-perf-probe`
+		`[${MODULE_ID}] Patches (libWrapper.Ready): item-getchatdata-lazy; item-chat-prep-hooks; prep-skip-enrich-html; off-tab stub; actor-sheet-change-tab-hooks; item-summary-expand-enrich; render-collapsed-rows-deferred-flag; sheet-perf-probe`
 	);
 });
 
