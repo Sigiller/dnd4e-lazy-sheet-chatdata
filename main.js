@@ -11,17 +11,23 @@ import { registerItemGetChatDataLazy } from "./lib/item-getchatdata-lazy.js";
 import { registerPrepSkipEnrichHtml } from "./lib/prep-skip-enrich-html.js";
 import { registerActorSheetChangeTabHooks } from "./lib/actor-sheet-change-tab-hooks.js";
 import { registerItemSummaryExpandEnrich } from "./lib/item-summary-expand-enrich.js";
-import { registerRenderCollapsedRowsDeferredFlag } from "./lib/render-collapsed-rows-deferred-flag.js";
-import { logParallelUpstreamSnippetOnce } from "./lib/parallel-prep-upstream-snippet.js";
-import {
-	registerSheetPerfLibWrapperProbes,
-	registerSheetPerfProbeInit,
-	registerSheetPerfProbeReady
-} from "./lib/sheet-perf-probe.js";
+import { registerRenderLazyRows } from "./lib/render-lazy-rows.js";
+import { registerSheetRenderToken } from "./lib/sheet-render-token.js";
+import { registerSheetPerfProbeInit, registerSheetPerfProbeReady } from "./lib/sheet-perf-probe.js";
 import { registerItemChatPrepHooks } from "./lib/item-chat-prep-hooks.js";
 
 /** @type {typeof import("/systems/dnd4e/module/applications/sheets/actor-sheet.mjs").default | null} */
 let ActorSheet4eClass = null;
+
+/**
+ * _prepareContext is wrapped on ready, after every other sheet module has registered its own
+ * (fox-4e-styling and friends register on init). Idempotent, and called from both hooks because
+ * either can win the race: the libWrapper.Ready handler may await a dynamic import past `ready`.
+ */
+function registerPrepContextMarkerWhenPossible() {
+	if (!ActorSheet4eClass || !game.ready) return;
+	registerPrepContextMarker(ActorSheet4eClass);
+}
 
 Hooks.once("init", () => {
 	registerModuleSettings();
@@ -29,8 +35,8 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-	if (game.system?.id !== "dnd4e" || !ActorSheet4eClass) return;
-	registerPrepContextMarker(ActorSheet4eClass);
+	if (game.system?.id !== "dnd4e") return;
+	registerPrepContextMarkerWhenPossible();
 	registerSheetPerfProbeReady();
 });
 
@@ -52,22 +58,16 @@ Hooks.once("libWrapper.Ready", async () => {
 	}
 
 	registerActorSheet4eClass(ActorSheet4eClass);
-	// _prepareContext: register on ready (fox-4e-styling and other sheet modules register on init first).
+	registerSheetRenderToken(); // first renderActorSheetV2 listener: bumps the render generation
 	registerPrepSkipEnrichHtml();
-	registerItemGetChatDataLazy(ActorSheet4eClass);
+	registerItemGetChatDataLazy();
 	registerItemChatPrepHooks();
 	registerItemSummaryExpandEnrich(ActorSheet4eClass);
 	registerActorSheetChangeTabHooks(ActorSheet4eClass);
-	registerRenderCollapsedRowsDeferredFlag(ActorSheet4eClass);
-	try {
-		registerSheetPerfLibWrapperProbes();
-	} catch (e) {
-		console.error(`[${MODULE_ID}] sheet perf probe libWrapper`, e);
-	}
-	logParallelUpstreamSnippetOnce();
+	registerRenderLazyRows();
+	registerPrepContextMarkerWhenPossible(); // no-op unless `ready` already fired
 
 	console.log(
-		`[${MODULE_ID}] Patches (libWrapper.Ready): item-getchatdata-lazy; item-chat-prep-hooks; prep-skip-enrich-html; off-tab stub; actor-sheet-change-tab-hooks; item-summary-expand-enrich; render-collapsed-rows-deferred-flag; sheet-perf-probe`
+		`[${MODULE_ID}] Patches (libWrapper.Ready): item-getchatdata-lazy; item-chat-prep-hooks; prep-skip-enrich-html; off-tab stub; actor-sheet-change-tab-hooks; item-summary-expand-enrich; render-lazy-rows`
 	);
 });
-

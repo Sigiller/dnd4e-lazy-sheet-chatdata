@@ -8,6 +8,8 @@ Repository: https://github.com/Sigiller/dnd4e-lazy-sheet-chatdata
 
 - Install the module under `Data/modules/dnd4e-lazy-sheet-chatdata` (or symlink this repo there).
 - Sheet diagnostics (`sheetPerf*`, `lib/sheet-perf-probe.js`) ship **inside** this module — disable the old standalone **sheet-perf-probe** module in the world if you still have it.
+- The probe's **render instrumentation is off by default** (it marks/measures every sheet render and adds a libWrapper frame around `_renderHTML`). The on-demand APIs work regardless; turn the hooks on for a measurement run with the `[dev] Sheet perf probe: timing hooks` client setting, or `sheetPerfEnableTimingHooks(true)` in the console.
+- `npm run verify` runs two static checks: `tools/verify-integration-points.mjs` (dnd4e symbols this module patches still exist) and `tools/verify-module-loads.mjs` (imports the real module graph against a Foundry stub and asserts every libWrapper target registers and every hot-path settings key is declared).
 
 ### Test configuration
 

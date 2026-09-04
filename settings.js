@@ -2,6 +2,7 @@ import { MODULE_ID } from "./constants.js";
 
 /**
  * World-scoped flags (GM toggles). Each patch file checks `enabled` and its own key.
+ * Read on the prep hot path via lib/lazy-prep-settings.js — add new keys to KEYS there.
  */
 export function registerModuleSettings() {
 	game.settings.register(MODULE_ID, "enabled", {
@@ -15,7 +16,7 @@ export function registerModuleSettings() {
 
 	game.settings.register(MODULE_ID, "enrichOnExpand", {
 		name: "Full enrich when expanding an item row",
-		hint: "After itemSummary — full getChatData and DOM update (see lib/item-summary-expand-enrich.js).",
+		hint: "After itemSummary — full getChatData and DOM update (see lib/item-summary-expand-enrich.js). Rows whose chatData was deferred are always filled on expand regardless of this flag.",
 		scope: "world",
 		config: true,
 		type: Boolean,
@@ -33,7 +34,7 @@ export function registerModuleSettings() {
 
 	game.settings.register(MODULE_ID, "lazyBiographyPrep", {
 		name: "Biography: skip enrich during sheet prep",
-		hint: "During _prepareContext — leave biography as raw HTML. Full enrich runs when the Biography tab is first shown (lib/actor-sheet-change-tab-hooks.js).",
+		hint: "During _prepareContext — leave biography as raw HTML. Full enrich runs after each render while the Biography tab is shown (lib/actor-sheet-change-tab-hooks.js).",
 		scope: "world",
 		config: true,
 		type: Boolean,
@@ -42,7 +43,7 @@ export function registerModuleSettings() {
 
 	game.settings.register(MODULE_ID, "lazyPowerCardPrepEnrich", {
 		name: "Power card (autoGen): skip enrich during prep",
-		hint: "During _prepareContext do not call enrichHTML for detailsText; raw card HTML until expand/re-render. See lib/prep-skip-enrich-html.js.",
+		hint: "During _prepareContext do not call enrichHTML for detailsText / item descriptions. Rows that render expanded are enriched after paint (lib/render-lazy-rows.js). See lib/prep-skip-enrich-html.js.",
 		scope: "world",
 		config: true,
 		type: Boolean,
@@ -58,18 +59,9 @@ export function registerModuleSettings() {
 		default: true
 	});
 
-	game.settings.register(MODULE_ID, "deferCompendiumEnrichDuringPrep", {
-		name: "Compendium links: stub getChatData during sheet prep",
-		hint: "During _prepareContext, items whose description contains @Compendium/@UUID/@Item/@Actor links get an empty stub until the row is expanded (full enrich on expand if «Full enrich when expanding» is on).",
-		scope: "world",
-		config: true,
-		type: Boolean,
-		default: true
-	});
-
 	game.settings.register(MODULE_ID, "enrichHtmlSessionCache", {
 		name: "enrichHTML session cache",
-		hint: "Short LRU keyed by input hash + actor + secrets. See lib/enrich-html-session-cache.js.",
+		hint: "Short LRU keyed by input hash + actor + secrets, for enrich calls that carry no rollData. See lib/enrich-html-session-cache.js.",
 		scope: "world",
 		config: true,
 		type: Boolean,

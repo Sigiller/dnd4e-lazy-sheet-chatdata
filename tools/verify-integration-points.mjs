@@ -59,7 +59,7 @@ const moduleFiles = [
 	"lib/prep-skip-enrich-html.js",
 	"lib/actor-sheet-change-tab-hooks.js",
 	"lib/item-summary-expand-enrich.js",
-	"lib/render-collapsed-rows-deferred-flag.js",
+	"lib/render-lazy-rows.js",
 	"main.js"
 ].map((f) => path.join(moduleRoot, f));
 ok("module entry files exist", moduleFiles.every((f) => fs.existsSync(f)));
@@ -102,6 +102,71 @@ ok(
 ok(
 	"closeApplicationV2 for ApplicationV2 sheets",
 	/closeApplicationV2/.test(fs.readFileSync(path.join(moduleRoot, "lib/actor-sheet-change-tab-hooks.js"), "utf8"))
+);
+
+const libWrapperRegister = fs.readFileSync(path.join(moduleRoot, "lib/libwrapper-register.js"), "utf8");
+ok(
+	"libWrapper descriptors resolved without eval",
+	!/new Function/.test(libWrapperRegister) && /foundry\.utils\.getProperty/.test(libWrapperRegister)
+);
+
+ok(
+	"no local copy of Item4e.getChatData (wrapper calls `wrapped`)",
+	!fs.existsSync(path.join(moduleRoot, "lib/get-chat-data-sheet-list-fast.js")) &&
+		/wrapped\.call\(this, htmlOptions, variance\)/.test(
+			fs.readFileSync(path.join(moduleRoot, "lib/item-getchatdata-lazy.js"), "utf8")
+		)
+);
+
+const renderLazyRows = fs.readFileSync(path.join(moduleRoot, "lib/render-lazy-rows.js"), "utf8");
+ok(
+	"expanded rows refreshed after render (re-render recovery)",
+	/li\.item:not\(\.collapsed\)\[data-item-id\]/.test(renderLazyRows) &&
+		/applyEnrichedItemSummary/.test(renderLazyRows)
+);
+
+ok(
+	"expand/refresh enriches description like the upstream item loop",
+	/enrichHTML/.test(fs.readFileSync(path.join(moduleRoot, "lib/item-enriched-summary.js"), "utf8"))
+);
+
+ok(
+	"biography enrich flag cleared per render",
+	/delete app\._lazyBiographyTabEnrichDone/.test(
+		fs.readFileSync(path.join(moduleRoot, "lib/actor-sheet-change-tab-hooks.js"), "utf8")
+	)
+);
+
+// `html?.[0] ?? html` silently resolves the sheet root to a <button>: the root is a <form>, and
+// HTMLFormElement indexed access is its form-controls collection. Cost us the whole
+// data-summary-deferred mechanism on Foundry v14. Must go through lib/sheet-root-element.js.
+const libSources = fs
+	.readdirSync(path.join(moduleRoot, "lib"))
+	.filter((f) => f.endsWith(".js"))
+	.map((f) => ({ file: f, src: fs.readFileSync(path.join(moduleRoot, "lib", f), "utf8") }));
+const jqueryRootIdiom = libSources.filter(
+	({ file, src }) => file !== "sheet-root-element.js" && /\?\.\[0\]\s*\?\?/.test(src)
+);
+ok(
+	"no jQuery-era `?.[0] ??` root unwrapping outside sheet-root-element.js",
+	jqueryRootIdiom.length === 0,
+	jqueryRootIdiom.map((x) => x.file).join(", ")
+);
+ok(
+	"sheet root resolved via resolveSheetRoot",
+	/resolveSheetRoot/.test(fs.readFileSync(path.join(moduleRoot, "lib/render-lazy-rows.js"), "utf8")) &&
+		/resolveSheetRoot/.test(
+			fs.readFileSync(path.join(moduleRoot, "lib/actor-sheet-change-tab-hooks.js"), "utf8")
+		)
+);
+
+const lazyPrepSettings = fs.readFileSync(path.join(moduleRoot, "lib/lazy-prep-settings.js"), "utf8");
+const settingsJs = fs.readFileSync(path.join(moduleRoot, "settings.js"), "utf8");
+const hotPathKeys = [...lazyPrepSettings.matchAll(/^\t"([a-zA-Z]+)",?$/gm)].map((m) => m[1]);
+ok(
+	"every hot-path settings key is registered",
+	hotPathKeys.length > 0 && hotPathKeys.every((k) => settingsJs.includes(`"${k}"`)),
+	hotPathKeys.join(", ")
 );
 
 const allPass = checks.every((c) => c.pass);

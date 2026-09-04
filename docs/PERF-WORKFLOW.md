@@ -21,6 +21,7 @@ Rule: **one logical step at a time** — measure → conclusion → only then th
 
 ## 4. Compare and record
 
+- The probe's timing hooks are **off by default** (they instrument every render). Turn them on for a run with the `[dev] Sheet perf probe: timing hooks` client setting, or `sheetPerfEnableTimingHooks(true)` in the console — otherwise `probeMeasuresForActor` in the collect JSON comes back empty. `sheetOpenMs` is measured by the collector itself and is unaffected.
 - Compare: primarily **median / max `sheetOpenMs`**, and if needed **`reloadToGameReadyMs`**, **`longTasksDuringOpen`**, or `RUN_BREAKDOWN=1` on the same actor when ambiguous.
 - Add a row to [`PERF-RESULTS.md`](PERF-RESULTS.md): date, step, commits before/after, numbers before/after, short verdict (better / worse / within noise).
 
@@ -37,4 +38,4 @@ Only after an accepted outcome (improvement or a deliberate “neutral + explain
 
 - Baseline series script: `tools/foundry-sheet-e2e/collect-plan-baseline.mjs`
 - Module version + git in collect JSON: `lazyModuleReport`
-- System compatibility: static checks `tools/verify-integration-points.mjs`, `tools/verify-getchatdata-sync.mjs` (dnd4e 0.9.x / Foundry 14). Historical v13 notes: [`AUDIT-0.7.14.md`](AUDIT-0.7.14.md)
+- System compatibility: static checks `tools/verify-integration-points.mjs`, `tools/verify-module-loads.mjs` (dnd4e 0.9.x / Foundry 14) — both run via `npm run verify`. Historical v13 notes: [`AUDIT-0.7.14.md`](AUDIT-0.7.14.md)

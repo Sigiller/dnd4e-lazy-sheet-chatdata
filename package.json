@@ -1,11 +1,11 @@
 {
 	"name": "dnd4e-lazy-sheet-chatdata",
-	"version": "0.12.0",
+	"version": "0.13.0",
 	"private": true,
 	"type": "module",
 	"description": "Mirrors the semver from module.json for tooling/diffs; Foundry loads module.json only.",
 	"scripts": {
-		"verify": "node tools/verify-integration-points.mjs && node tools/verify-getchatdata-sync.mjs",
+		"verify": "node tools/verify-integration-points.mjs && node tools/verify-module-loads.mjs",
 		"check": "npm run verify",
 		"prepare": "husky",
 		"verify-tag-version": "bash scripts/verify-tag-version.sh"

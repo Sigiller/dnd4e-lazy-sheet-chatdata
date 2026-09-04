@@ -3,6 +3,8 @@
 **Date (UTC):** 2026-06-02  
 **World reference:** `scales-of-war` (`systemVersion`: 0.7.14)
 
+**0.13.0 (module):** review pass — see the changelog note in [PERF-RESULTS.md](PERF-RESULTS.md); the compendium-stub setting was removed and the local `getChatData` copy deleted.
+
 **0.11.0 (module):** cold-open fix — `preparingSheetByActor` registry, prep never calls full `getChatData`, compendium-link stub, module-only `deferOffTabItemChatPrep` stubs. Re-verify with e2e after upgrade.
 
 ## Verdict
@@ -22,13 +24,13 @@ Run from repo root:
 
 ```bash
 node Data/modules/dnd4e-lazy-sheet-chatdata/tools/verify-integration-points.mjs
-node Data/modules/dnd4e-lazy-sheet-chatdata/tools/verify-getchatdata-sync.mjs
+node Data/modules/dnd4e-lazy-sheet-chatdata/tools/verify-module-loads.mjs
 ```
 
 | Script | Result (2026-06-02) |
 |--------|---------------------|
 | `verify-integration-points.mjs` | **PASS** — all hook targets present in dnd4e 0.7.14; no `deferOffTabItemChatPrep` in core |
-| `verify-getchatdata-sync.mjs` | **PASS** (`matchIgnoringWhitespace: true`) — `getChatDataSheetListFast` matches `Item4e.getChatData` except `enrichHTML` |
+| `verify-getchatdata-sync.mjs` | **PASS** (`matchIgnoringWhitespace: true`) — `getChatDataSheetListFast` matched `Item4e.getChatData` byte-for-byte. Retired in 0.13.0: the copy was deleted and the wrapper calls `wrapped`; replaced by `verify-module-loads.mjs` |
 
 ---
 
@@ -95,7 +97,7 @@ Optional perf: `globalThis.sheetPerfBaseline("ActorName")` — see [`PERF-WORKFL
 On each dnd4e bump:
 
 1. Run both `tools/verify-*.mjs` scripts.
-2. Diff `module/item/item.js` `getChatData` vs `lib/get-chat-data-sheet-list-fast.js`.
+2. ~~Diff `getChatData` vs the module's copy~~ — no copy since 0.13.0; the wrapper delegates to `wrapped`.
 3. Re-check `actor-sheet.js` item loop and `itemSummary` / templates.
 4. Re-run manual checklist or `npm run collect` in `tools/foundry-sheet-e2e` (world logged in).
 
