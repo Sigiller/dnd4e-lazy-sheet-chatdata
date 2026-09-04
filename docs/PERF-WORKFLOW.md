@@ -6,7 +6,7 @@ Rule: **one logical step at a time** — measure → conclusion → only then th
 
 - Lock in **one** intentional step (one hypothesis / one code change).
 - Run `tools/foundry-sheet-e2e` in the **same world** with the same `.env` as the comparison (prefer `COLD_OPEN_RUNS=5`, `COLD_OPEN_ONLY=1`). `FVTT_USER` необязателен: скрипт перебирает пользователей с `/join` до успешного `game.ready` (см. `FVTT_TRY_ALL_USERS`, `JOIN_PER_USER_TIMEOUT_MS` в `.env.example`).
-- Save the JSON (`sheet-perf-collect-*.json`) and copy key fields into the log: `coldOpen.summary`, `worldBaseline`, `lazyModuleReport`.
+- Save the JSON (`reports/sheet-perf-collect-*.json`) and copy key fields into the log: `coldOpen.summary`, `worldBaseline`, `lazyModuleReport`.
 
 ## 2. Implementation
 
@@ -37,4 +37,4 @@ Only after an accepted outcome (improvement or a deliberate “neutral + explain
 
 - Baseline series script: `tools/foundry-sheet-e2e/collect-plan-baseline.mjs`
 - Module version + git in collect JSON: `lazyModuleReport`
-- System compatibility audit (e.g. dnd4e 0.7.14): [`AUDIT-0.7.14.md`](AUDIT-0.7.14.md); static checks: `tools/verify-integration-points.mjs`, `tools/verify-getchatdata-sync.mjs`
+- System compatibility: static checks `tools/verify-integration-points.mjs`, `tools/verify-getchatdata-sync.mjs` (dnd4e 0.9.x / Foundry 14). Historical v13 notes: [`AUDIT-0.7.14.md`](AUDIT-0.7.14.md)

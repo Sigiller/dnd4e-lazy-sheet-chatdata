@@ -1,6 +1,6 @@
 # Comparative run log (cold open)
 
-Add **one table row per completed step** after comparing two JSON files (before / after). Filenames: `tools/foundry-sheet-e2e/sheet-perf-collect-*.json`.
+Add **one table row per completed step** after comparing two JSON files (before / after). Filenames: `tools/foundry-sheet-e2e/reports/sheet-perf-collect-*.json`.
 
 Copy the header row if you extend the table:
 

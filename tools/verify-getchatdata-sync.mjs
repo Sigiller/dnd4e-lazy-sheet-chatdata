@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const moduleRoot = path.resolve(__dirname, "..");
-const systemItem = path.resolve(moduleRoot, "../../systems/dnd4e/module/item/item.js");
+const systemItem = path.resolve(moduleRoot, "../../systems/dnd4e/module/documents/item.mjs");
 
 const fastPath = path.join(moduleRoot, "lib/get-chat-data-sheet-list-fast.js");
 

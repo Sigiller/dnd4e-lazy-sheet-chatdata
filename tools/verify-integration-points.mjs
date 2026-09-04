@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Verify dnd4e 0.7.14 still exposes symbols patched by dnd4e-lazy-sheet-chatdata.
+ * Verify dnd4e 0.9.x still exposes symbols patched by dnd4e-lazy-sheet-chatdata.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -21,10 +21,15 @@ function ok(name, pass, detail = "") {
 	checks.push({ name, pass, detail });
 }
 
-const actorSheet = read("module/actor/actor-sheet.js");
-const itemJs = read("module/item/item.js");
+const actorSheet = read("module/applications/sheets/actor-sheet.mjs");
+const itemJs = read("module/documents/item.mjs");
 
-ok("system.version", systemJson.version === "0.7.14", systemJson.version);
+ok("system.version 0.9+", /^0\.9\./.test(systemJson.version), systemJson.version);
+ok(
+	"system Foundry 14",
+	String(systemJson.compatibility?.minimum).startsWith("14"),
+	JSON.stringify(systemJson.compatibility)
+);
 ok("ActorSheet4e._prepareContext", /async _prepareContext\s*\(/.test(actorSheet));
 ok(
 	"ActorSheet4e App V2 (changeTab on prototype chain)",
@@ -37,6 +42,7 @@ ok("#onItemSummary", /#onItemSummary/.test(actorSheet));
 ok("biography enrichHTML", /enrichHTML\(context\.system\.biography/.test(actorSheet));
 ok("Item4e.getChatData", /async getChatData\s*\(htmlOptions/.test(itemJs));
 ok("no core deferOffTab patch", !/deferOffTabItemChatPrep/.test(actorSheet));
+ok("dnd4e.utils namespace (no game.helper)", /export function preparePowerCardData/.test(read("module/utils/utils.mjs")));
 
 const templates = ["powers", "inventory", "features", "rituals"].map((t) =>
 	read(`templates/actors/tabs/${t}.hbs`)
@@ -69,7 +75,7 @@ const libFiles = [
 	"lib/actor-sheet-change-tab-hooks.js"
 ].map((f) => fs.readFileSync(path.join(moduleRoot, f), "utf8"));
 ok(
-	"libWrapper uses string targets via registerLibWrapperFirst (FVTT 13)",
+	"libWrapper uses string targets via registerLibWrapperFirst",
 	libFiles.every((src) => /registerLibWrapperFirst/.test(src)) &&
 		libFiles.every((src) => !/libWrapper\.register\s*\(\s*MODULE_ID\s*,\s*[A-Za-z_]/.test(src))
 );
@@ -87,6 +93,15 @@ ok(
 	"enrichHTML + getChatData use libWrapper.MIXED (may skip wrapped)",
 	/libWrapper\.MIXED/.test(fs.readFileSync(path.join(moduleRoot, "lib/prep-skip-enrich-html.js"), "utf8")) &&
 		/libWrapper\.MIXED/.test(fs.readFileSync(path.join(moduleRoot, "lib/item-getchatdata-lazy.js"), "utf8"))
+);
+ok(
+	"ActorSheet4e import is 0.9 path",
+	/applications\/sheets\/actor-sheet\.mjs/.test(fs.readFileSync(path.join(moduleRoot, "constants.js"), "utf8")) &&
+		/ACTOR_SHEET4E_IMPORT/.test(fs.readFileSync(path.join(moduleRoot, "main.js"), "utf8"))
+);
+ok(
+	"closeApplicationV2 for ApplicationV2 sheets",
+	/closeApplicationV2/.test(fs.readFileSync(path.join(moduleRoot, "lib/actor-sheet-change-tab-hooks.js"), "utf8"))
 );
 
 const allPass = checks.every((c) => c.pass);

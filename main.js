@@ -1,9 +1,9 @@
 /**
- * Entry point: small performance patches for the dnd4e actor sheet (v13).
+ * Entry point: small performance patches for the dnd4e actor sheet (Foundry v14).
  * Logic is split across lib/*.js — roughly one future upstream PR per file.
  */
 
-import { MODULE_ID } from "./constants.js";
+import { ACTOR_SHEET4E_IMPORT, MODULE_ID } from "./constants.js";
 import { registerModuleSettings } from "./settings.js";
 import { registerActorSheet4eClass } from "./lib/sheet-prep-context.js";
 import { registerPrepContextMarker } from "./lib/prep-context-marker.js";
@@ -20,7 +20,7 @@ import {
 } from "./lib/sheet-perf-probe.js";
 import { registerItemChatPrepHooks } from "./lib/item-chat-prep-hooks.js";
 
-/** @type {typeof import("/systems/dnd4e/module/actor/actor-sheet.js").default | null} */
+/** @type {typeof import("/systems/dnd4e/module/applications/sheets/actor-sheet.mjs").default | null} */
 let ActorSheet4eClass = null;
 
 Hooks.once("init", () => {
@@ -41,8 +41,11 @@ Hooks.once("libWrapper.Ready", async () => {
 	}
 
 	try {
-		const mod = await import("/systems/dnd4e/module/actor/actor-sheet.js");
-		ActorSheet4eClass = mod.default;
+		ActorSheet4eClass = globalThis.dnd4e?.applications?.sheets?.ActorSheet4e ?? null;
+		if (!ActorSheet4eClass) {
+			const mod = await import(ACTOR_SHEET4E_IMPORT);
+			ActorSheet4eClass = mod.default;
+		}
 	} catch (e) {
 		console.error(`[${MODULE_ID}] import actor-sheet`, e);
 		return;

@@ -33,7 +33,7 @@ export function registerModuleSettings() {
 
 	game.settings.register(MODULE_ID, "lazyBiographyPrep", {
 		name: "Biography: skip enrich during sheet prep",
-		hint: "During _prepareContext — commonReplace (or raw HTML) only. Full enrich runs when the Biography tab is first shown (lib/actor-sheet-change-tab-hooks.js).",
+		hint: "During _prepareContext — leave biography as raw HTML. Full enrich runs when the Biography tab is first shown (lib/actor-sheet-change-tab-hooks.js).",
 		scope: "world",
 		config: true,
 		type: Boolean,

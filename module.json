@@ -1,14 +1,14 @@
 {
 	"id": "dnd4e-lazy-sheet-chatdata",
 	"title": "dnd4e Lazy Sheet ChatData",
-	"description": "DnD 4th Edition (dnd4e system) only — does not run on other systems. Performance patches for the dnd4e actor sheet (Foundry v13), tested against dnd4e 0.7.11: deferred getChatData / partial enrichHTML during sheet prep, plus an embedded sheet performance probe (lib/sheet-perf-probe.js). Requires lib-wrapper. Disable the standalone sheet-perf-probe module if it is still enabled in the world to avoid double libWrapper hooks on _renderHTML.",
-	"version": "0.11.7",
+	"description": "DnD 4th Edition (dnd4e system) only — does not run on other systems. Performance patches for the dnd4e actor sheet (Foundry v14), tested against dnd4e 0.9.2: deferred getChatData / partial enrichHTML during sheet prep, plus an embedded sheet performance probe (lib/sheet-perf-probe.js). Requires lib-wrapper. Disable the standalone sheet-perf-probe module if it is still enabled in the world to avoid double libWrapper hooks on _renderHTML.",
+	"version": "0.12.0",
 	"authors": [{ "name": "Sigiller", "url": "https://github.com/Sigiller" }],
 	"esmodules": ["main.js"],
 	"compatibility": {
-		"minimum": "13.351",
-		"verified": "13.351",
-		"maximum": "13.351"
+		"minimum": "14",
+		"verified": "14.367",
+		"maximum": "14"
 	},
 	"relationships": {
 		"systems": [
@@ -17,8 +17,8 @@
 				"type": "system",
 				"manifest": "https://raw.githubusercontent.com/EndlesNights/dnd4eBeta/main/system.json",
 				"compatibility": {
-					"minimum": "0.7.11",
-					"verified": "0.7.14"
+					"minimum": "0.9.2",
+					"verified": "0.9.2"
 				}
 			}
 		],
